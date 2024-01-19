@@ -1,46 +1,56 @@
-/* push,pall.c */
-#include "monty.h"
+#ifndef MONTY_H
+#define MONTY_H
+
 #include <stdio.h>
+#include <stdlib.h>
+
+/* Data structures */
 
 /**
- * main - Monty bytecode interpreter
- * @argc: argument count
- * @argv: argument vector
- * Return: EXIT_SUCCESS or EXIT_FAILURE
+ * struct stack_s - doubly linked list representation of a stack (or queue)
+ * @n: integer
+ * @prev: points to the previous element of the stack (or queue)
+ * @next: points to the next element of the stack (or queue)
+ *
+ * Description: doubly linked list node structure
+ * for stack, queues, LIFO, FIFO
  */
-int main(int argc, char *argv[])
+typedef struct stack_s
 {
-    stack_t *stack = NULL;
-    unsigned int line_number = 0;
-    char *file_path;
+    int n;
+    struct stack_s *prev;
+    struct stack_s *next;
+} stack_t;
 
-    if (argc != 2)
-    {
-        fprintf(stderr, "USAGE: monty file\n");
-        return EXIT_FAILURE;
-    }
+/**
+ * struct instruction_s - opcode and its function
+ * @opcode: the opcode
+ * @f: function to handle the opcode
+ *
+ * Description: opcode and its function
+ * for stack, queues, LIFO, FIFO
+ */
+typedef struct instruction_s
+{
+    char *opcode;
+    void (*f)(stack_t **stack, unsigned int line_number);
+} instruction_t;
 
-    file_path = argv[1];
-    bus.file = fopen(file_path, "r");
-    if (!bus.file)
-    {
-        fprintf(stderr, "Error: Can't open file %s\n", file_path);
-        return EXIT_FAILURE;
-    }
+/* Global variable for holding data during opcode execution */
+extern struct {
 
-    while (fgets(bus.content, sizeof(bus.content), bus.file) != NULL)
-    {
-        line_number++;
+    char *arg;
+} data;
 
-        if (bus.content[0] == '\n' || bus.content[0] == ' ')
-            continue;
+/* Function prototypes */
 
-        process_opcode(&stack, line_number);
-    }
+void push(stack_t **stack, unsigned int line_number);
+void pall(stack_t **stack, unsigned int line_number);
+void pint(stack_t **stack, unsigned int line_number);
+void pop(stack_t **stack, unsigned int line_number);
+void swap(stack_t **stack, unsigned int line_number);
+void add(stack_t **stack, unsigned int line_number);
+void nop(stack_t **stack, unsigned int line_number);
 
-    fclose(bus.file);
-    free_stack(stack);
-
-    return EXIT_SUCCESS;
-}
+#endif 
 
