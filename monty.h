@@ -1,34 +1,46 @@
-/* monty.h */
-#ifndef MONTY_H
-#define MONTY_H
-
+/* push,pall.c */
+#include "monty.h"
 #include <stdio.h>
 
-/* Define structure for stack */
-typedef struct stack_s
+/**
+ * main - Monty bytecode interpreter
+ * @argc: argument count
+ * @argv: argument vector
+ * Return: EXIT_SUCCESS or EXIT_FAILURE
+ */
+int main(int argc, char *argv[])
 {
-    int n;
-    struct stack_s *next;
-} stack_t;
+    stack_t *stack = NULL;
+    unsigned int line_number = 0;
+    char *file_path;
 
-/* Define structure for Monty data bus */
-typedef struct monty_bus_s
-{
-    FILE *file;
-    char *content;
-    size_t size;
-    stack_t *stack;
-} monty_bus_t;
+    if (argc != 2)
+    {
+        fprintf(stderr, "USAGE: monty file\n");
+        return EXIT_FAILURE;
+    }
 
-extern monty_bus_t bus;
+    file_path = argv[1];
+    bus.file = fopen(file_path, "r");
+    if (!bus.file)
+    {
+        fprintf(stderr, "Error: Can't open file %s\n", file_path);
+        return EXIT_FAILURE;
+    }
 
-/* Function declarations */
-void push(stack_t **stack, int value, unsigned int line_number);
-void pall(stack_t **stack, unsigned int line_number);
-void free_stack(stack_t *stack);
-int is_valid_integer(const char *str);
-void exit_with_error(void);
-void process_opcode(stack_t **stack, unsigned int line_number);
+    while (fgets(bus.content, sizeof(bus.content), bus.file) != NULL)
+    {
+        line_number++;
 
-#endif /* MONTY_H */
+        if (bus.content[0] == '\n' || bus.content[0] == ' ')
+            continue;
+
+        process_opcode(&stack, line_number);
+    }
+
+    fclose(bus.file);
+    free_stack(stack);
+
+    return EXIT_SUCCESS;
+}
 
